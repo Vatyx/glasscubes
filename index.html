@@ -90,7 +90,6 @@
 					var mesh = new THREE.Mesh( cgeometry, material );
 					var group = new THREE.Object3D();
 					group.add( mesh );
-					console.log(lines[i].vert);
 					group.position.set(-length, lines[i].vert, 0);
 					scene.add(group);
 
