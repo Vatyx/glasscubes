@@ -15,7 +15,7 @@
     var geometry, material, mesh;
     var group;
 
-    var numOfLines = 5;
+    var numOfLines = 7;
     var lines = [];
     var boxes = [];
 
@@ -37,13 +37,14 @@
         document.body.appendChild( renderer.domElement );
 
 
-        var top = 20;
+        var top = 30;
 
         for(var i = 0; i < numOfLines; i++)
         {
         	line = {};
         	line.color = Math.random() * 0xffffff;
         	line.vert = top - 10*i;
+        	line.interval = Math.floor(Math.random() * (80 - 30 + 1)) + 30;
 
         	var geometry = new THREE.Geometry();
         	geometry.vertices.push(new THREE.Vector3(-75, line.vert, 0));
@@ -59,52 +60,31 @@
 
         	lines.push(line);
         }
-
-
-     //    var material = new THREE.LineBasicMaterial({
-     //    	color: 0xffffff
-     //    });
-
-     //    var geometry = new THREE.Geometry();
-     //    geometry.vertices.push(new THREE.Vector3(-75, 0, 0));
-    	// geometry.vertices.push(new THREE.Vector3(75, 0, 0));
-    	// //geometry.vertices.push(new THREE.Vector3(10, 0, 0));
-
-    	// var line = new THREE.Line(geometry, material);
-    	// scene.add(line);
-
-  //   	var cgeometry = new THREE.BoxGeometry( 2, 2, 2);
-		// var material = new THREE.MeshBasicMaterial( { color: 0xffffff } );
-		// var mesh = new THREE.Mesh( cgeometry, material );
-		// group = new THREE.Object3D();
-		// group.add( mesh );
-		// group.position.set(-75, 0, 0);
-		// console.log(group.position);
-		// scene.add(group);
     } 
 
     function animate() {
 
         requestAnimationFrame( animate );
 
-        if(counter == 60)
+        if(true)
         {
         	for(var i = 0; i < numOfLines; i++)
 	        {
-	        	var cgeometry = new THREE.BoxGeometry( 2, 2, 2);
-				var material = new THREE.MeshBasicMaterial( { color: lines[i].color } );
-				var mesh = new THREE.Mesh( cgeometry, material );
-				var group = new THREE.Object3D();
-				group.add( mesh );
-				console.log(lines[i].vert);
-				group.position.set(-75, lines[i].vert, 0);
-				scene.add(group);
 
-				boxes.push(group);
+	        	if(counter % lines[i].interval == 0)
+	        	{
+	        		var cgeometry = new THREE.BoxGeometry( 2, 2, 2);
+					var material = new THREE.MeshBasicMaterial( { color: lines[i].color } );
+					var mesh = new THREE.Mesh( cgeometry, material );
+					var group = new THREE.Object3D();
+					group.add( mesh );
+					console.log(lines[i].vert);
+					group.position.set(-75, lines[i].vert, 0);
+					scene.add(group);
+
+					boxes.push(group);
+	        	}
 	        }
-
-	        counter = 0;
-	        console.log("here");
         }
 
         boxes.forEach(function(box)
@@ -116,36 +96,6 @@
         	}
         });
 
-   //      if(counter == 60)
-   //      {
-   //      	var cgeometry = new THREE.BoxGeometry( 2, 2, 2);
-			// var material = new THREE.MeshBasicMaterial( { color: 0xffffff } );
-			// var mesh = new THREE.Mesh( cgeometry, material );
-			// var group = new THREE.Object3D();
-			// group.add( mesh );
-			// group.position.set(-75, 0, 0);
-			// scene.add(group);
-
-			// boxes.push(group);
-
-			// counter = 0;
-   //      }
-
-   //      boxes.forEach(function(box)
-   //      {
-   //      	box.translateX(.75);
-   //      	if(box.position.x >= 74)
-   //      	{
-   //      		scene.remove(box);
-   //      	}
-   //      });
-
-
-   //      // group.translateX(.75);
-   //      // if(group.position.x > 75)
-   //      // 	scene.remove(group);
-
-   //      counter++;
    		counter++;
         renderer.render( scene, camera );
 
