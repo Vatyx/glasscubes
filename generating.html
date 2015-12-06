@@ -43,11 +43,20 @@
         pointLight.position.z = 130;
 
         scene.add(pointLight);
+
+        var pointLight = new THREE.PointLight(0xFFFFFF);
+
+        pointLight.position.x = 10;
+        pointLight.position.y = 50;
+        pointLight.position.z = -130;
+
+        scene.add(pointLight);
+
         var top = 30;
 
         geometry = new THREE.Geometry();
-        geometry.vertices.push(new THREE.Vector3(-length, 0, 0));
-        geometry.vertices.push(new THREE.Vector3(length, 0, 10));
+        geometry.vertices.push(new THREE.Vector3(-length, -10, 0));
+        geometry.vertices.push(new THREE.Vector3(length, 10, 0));
 
         var material = new THREE.LineBasicMaterial({
             color: 0x00ff00
@@ -63,9 +72,9 @@
         console.log(Math.acos(unit.y));
         console.log(Math.acos(unit.z));
         console.log(unit.x * unit.x + unit.y * unit.y + unit.z * unit.z);
-        //cgeometry.rotateY(Math.acos(unit.y));
-        //cgeometry.rotateX(Math.acos(unit.x));
-        cgeometry.rotateZ(Math.acos(unit.z));
+        //cgeometry.rotateY(-Math.acos(unit.x));
+        cgeometry.rotateX(-Math.acos(unit.z));
+        cgeometry.rotateZ(-Math.acos(unit.y));
 
         //cgeometry.translate(geometry.vertices[0].x, geometry.vertices[0].y, geometry.vertices[0].z)
         var material = new THREE.MeshPhongMaterial( { color: 0xffffff, specular: 0x050505,
@@ -106,7 +115,7 @@
         //console.log(norm);
 
         //group1.position.add(norm);
-        //group1.rotation.z += 0.25;
+        group1.rotation.y += 0.05;
 
         controls.update();
         renderer.render( scene, camera );
