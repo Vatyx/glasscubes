@@ -52,6 +52,8 @@
     var updown = true;
     var sint = 0.05;
 
+    var colors = [0xe64c3c, 0x000000, 0xf29c1f, 0xFF1744, 0xf0c419, 0xFB8C00, 0x4fba6f, 0xFFEB3B, 0x26b99a, 0x00E676, 0x3b97d3, 0x00E5FF, 0x955ba5, 0x894b9d];
+
     init();
     animate();
     function init() {
@@ -63,17 +65,53 @@
         renderer.setSize( window.innerWidth, window.innerHeight );
         document.body.appendChild( renderer.domElement );
         var pointLight = new THREE.PointLight(0xFFFFFF);
-    // set its position
-    pointLight.position.x = 10;
-    pointLight.position.y = 50;
-    pointLight.position.z = 130;
-    // add to the scene
-    scene.add(pointLight);
+        // set its position
+        pointLight.position.x = 10;
+        pointLight.position.y = 50;
+        pointLight.position.z = 130;
+        // add to the scene
+        scene.add(pointLight);
+
+        var pointLight1 = new THREE.PointLight(0xFFFFFF);
+        pointLight1.position.x = 10;
+        pointLight1.position.y = 50;
+        pointLight1.position.z = -130;
+        // add to the scene
+        scene.add(pointLight1);
+
+        var pointLight2 = new THREE.PointLight(0xFFFFFF);
+        pointLight2.position.x = -100;
+        pointLight2.position.y = 0;
+        pointLight2.position.z = 0;
+        // add to the scene
+        scene.add(pointLight2);
+
+        var pointLight3 = new THREE.PointLight(0xFFFFFF);
+        pointLight3.position.x = 100;
+        pointLight3.position.y = 0;
+        pointLight3.position.z = 0;
+        // add to the scene
+        scene.add(pointLight3);
+
+        var pointLight4 = new THREE.PointLight(0xFFFFFF);
+        pointLight4.position.x = 0;
+        pointLight4.position.y = 40;
+        pointLight4.position.z = 20;
+        // add to the scene
+        scene.add(pointLight4);
+
+        var pointLight5 = new THREE.PointLight(0xFFFFFF);
+        pointLight5.position.x = 0;
+        pointLight5.position.y = -40;
+        pointLight5.position.z = 20;
+        // add to the scene
+        scene.add(pointLight5);
+
         var top = 30;
         for(var i = 0; i < numOfLines; i++)
         {
             line = {};
-            line.color = Math.random() * 0xffffff;
+            line.color = colors[i*2];//Math.random() * 0xffffff;
             line.vert = top - 10*i;
             line.interval = Math.floor(Math.random() * (80 - 30 + 1)) + 30;
             var geometry = new THREE.Geometry();
@@ -91,12 +129,12 @@
         for(var i = 0; i < numOfLines; i++)
         {
             line = {};
-            line.color = Math.random() * 0xffffff;
+            line.color = colors[i*2 + 1];
             line.vert = top - 10*i;
             line.interval = Math.floor(Math.random() * (80 - 30 + 1)) + 30;
             var geometry = new THREE.Geometry();
-            geometry.vertices.push(new THREE.Vector3(-length, line.vert, 20));
-            geometry.vertices.push(new THREE.Vector3(length, line.vert, 20));
+            geometry.vertices.push(new THREE.Vector3(-length, line.vert, 40));
+            geometry.vertices.push(new THREE.Vector3(length, line.vert, 40));
             var material = new THREE.LineBasicMaterial({
                 color: line.color
             });
@@ -106,23 +144,7 @@
             lines.push(line);
         }
 
-        // for(var i = 0; i < numOfLines; i++)
-        // {
-        //     line = {};
-        //     line.color = Math.random() * 0xffffff;
-        //     line.vert = top - 10*i;
-        //     line.interval = Math.floor(Math.random() * (80 - 30 + 1)) + 30;
-        //     var geometry = new THREE.Geometry();
-        //     geometry.vertices.push(new THREE.Vector3(-length, line.vert, -20));
-        //     geometry.vertices.push(new THREE.Vector3(length, line.vert, -20));
-        //     var material = new THREE.LineBasicMaterial({
-        //         color: line.color
-        //     });
-        //     var l = new THREE.Line(geometry, material);
-        //     scene.add(l);
-        //     line.body = l;
-        //     lines.push(line);
-        // }
+        renderer.shadowMap.enabled = false;
     }
 
     function animate() {
@@ -138,17 +160,20 @@
             {
               var cgeometry;
 
-              if(Math.floor(Math.random() * 2))
+              switch(Math.floor(Math.random() * 3))
               {
-                cgeometry = new THREE.BoxGeometry( 3, 3, 3);
-              }
-              else
-              {
-                cgeometry = new THREE.BoxGeometry( 3, 3, 3);
+                case 0:
+                    cgeometry = new THREE.BoxGeometry( 3, 3, 3);
+                    break;
+                case 1:
+                    cgeometry = new THREE.CylinderGeometry( 2, 2, 3);
+                    break;
+                case 2:
+                    cgeometry = new THREE.OctahedronGeometry(3);
+                    break;
               }
 
-              var material = new THREE.MeshPhongMaterial( { color: lines[i].color, specular: 0x050505,
-        shininess: 100 } );
+              var material = new THREE.MeshPhongMaterial( { color: lines[i].color, specular: 0x050505} );
               var mesh = new THREE.Mesh( cgeometry, material );
               var group = new THREE.Object3D();
               group.add( mesh );
@@ -158,13 +183,17 @@
               group.scale.x = s;
               group.scale.y = s;
               group.scale.z = s;
+              group.rotation.x = Math.random() * 6.28;
+
               var b = false;
 
               if(s > 1)
                 b = true;
 
+              var r = Math.random() * (0.1) - 0.05;
+
               scene.add(group);
-              boxes.push({box: group, updown: b});
+              boxes.push({box: group, updown: b, rot: r});
             }
           }
         }
@@ -178,18 +207,20 @@
 
             var average = 0;
 
-            for(var i = 0; i < dataArray.length-50; i++)
+            for(var i = 0; i < dataArray.length-30; i++)
             {
                 average += dataArray[i];
             }
-            average /= (dataArray.length-50);
+            average /= (dataArray.length-30);
 
             var temp = average / 255;
-            sint = temp*1.5 + 0.5;
+            sint = temp*2 + 0.5;
 
             box.box.scale.x = sint;
             box.box.scale.y = sint;
             box.box.scale.z = sint;
+
+            box.box.rotation.x += 0.01;
 
             // if(box.updown)
             // {
