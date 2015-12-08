@@ -1,0 +1,227 @@
+<html>
+  <head>
+    <title>First</title>
+    <style>
+      body { margin: 0; }
+      canvas { width: 100%; height: 100% }
+    </style>
+  </head>
+  <body> 
+    <div id="context"></div>
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script src="http://threejs.org/build/three.min.js"></script> 
+    
+    <script>
+    var audio = new Audio('/intro.mp3');
+    $('#context').append(audio);
+    
+
+    var context = new (window.AudioContext || window.webkitAudioContext)();
+    var analyser = context.createAnalyser();
+    var source = context.createMediaElementSource(audio);
+    source.connect(analyser);
+    analyser.connect(context.destination);
+    analyser.fftSize = 256;
+    var bufferLength = analyser.frequencyBinCount;
+    var dataArray = new Uint8Array(bufferLength);
+    analyser.getByteFrequencyData(dataArray);
+    console.log(dataArray);
+
+    audio.play();
+
+    $('body').click(function()
+    {
+        analyser.getByteFrequencyData(dataArray);
+        console.log(dataArray);
+    });
+
+    // var analyser = context.createAnalyser();
+    // we have to connect the MediaElementSource with the analyser 
+    // audioSrc.connect(analyser);
+    // frequencyData = new Uint8Array(analyser.frequencyBinCount);
+    // console.log(frequencyData);
+
+    var scene, camera, renderer;
+    var geometry, material, mesh;
+    var group;
+    var numOfLines = 7;
+    var lines = [];
+    var boxes = [];
+    var length = 100;
+    var counter = 60;
+    var updown = true;
+    var sint = 0.05;
+
+    init();
+    animate();
+    function init() {
+        scene = new THREE.Scene();
+        camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 500);
+        camera.position.set(0, 0, 100);
+        camera.lookAt(new THREE.Vector3(0, 0, 0));
+        renderer = new THREE.WebGLRenderer();
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        document.body.appendChild( renderer.domElement );
+        var pointLight = new THREE.PointLight(0xFFFFFF);
+    // set its position
+    pointLight.position.x = 10;
+    pointLight.position.y = 50;
+    pointLight.position.z = 130;
+    // add to the scene
+    scene.add(pointLight);
+        var top = 30;
+        for(var i = 0; i < numOfLines; i++)
+        {
+            line = {};
+            line.color = Math.random() * 0xffffff;
+            line.vert = top - 10*i;
+            line.interval = Math.floor(Math.random() * (80 - 30 + 1)) + 30;
+            var geometry = new THREE.Geometry();
+            geometry.vertices.push(new THREE.Vector3(-length, line.vert, 0));
+            geometry.vertices.push(new THREE.Vector3(length, line.vert, 0));
+            var material = new THREE.LineBasicMaterial({
+                color: line.color
+            });
+            var l = new THREE.Line(geometry, material);
+            scene.add(l);
+            line.body = l;
+            lines.push(line);
+        }
+
+        for(var i = 0; i < numOfLines; i++)
+        {
+            line = {};
+            line.color = Math.random() * 0xffffff;
+            line.vert = top - 10*i;
+            line.interval = Math.floor(Math.random() * (80 - 30 + 1)) + 30;
+            var geometry = new THREE.Geometry();
+            geometry.vertices.push(new THREE.Vector3(-length, line.vert, 20));
+            geometry.vertices.push(new THREE.Vector3(length, line.vert, 20));
+            var material = new THREE.LineBasicMaterial({
+                color: line.color
+            });
+            var l = new THREE.Line(geometry, material);
+            scene.add(l);
+            line.body = l;
+            lines.push(line);
+        }
+
+        // for(var i = 0; i < numOfLines; i++)
+        // {
+        //     line = {};
+        //     line.color = Math.random() * 0xffffff;
+        //     line.vert = top - 10*i;
+        //     line.interval = Math.floor(Math.random() * (80 - 30 + 1)) + 30;
+        //     var geometry = new THREE.Geometry();
+        //     geometry.vertices.push(new THREE.Vector3(-length, line.vert, -20));
+        //     geometry.vertices.push(new THREE.Vector3(length, line.vert, -20));
+        //     var material = new THREE.LineBasicMaterial({
+        //         color: line.color
+        //     });
+        //     var l = new THREE.Line(geometry, material);
+        //     scene.add(l);
+        //     line.body = l;
+        //     lines.push(line);
+        // }
+    }
+
+    function animate() {
+        requestAnimationFrame( animate );
+
+        analyser.getByteFrequencyData(dataArray);
+
+        if(true)
+        {
+          for(var i = 0; i < lines.length; i++)
+          {
+            if(counter % lines[i].interval == 0)
+            {
+              var cgeometry;
+
+              if(Math.floor(Math.random() * 2))
+              {
+                cgeometry = new THREE.BoxGeometry( 3, 3, 3);
+              }
+              else
+              {
+                cgeometry = new THREE.BoxGeometry( 3, 3, 3);
+              }
+
+              var material = new THREE.MeshPhongMaterial( { color: lines[i].color, specular: 0x050505,
+        shininess: 100 } );
+              var mesh = new THREE.Mesh( cgeometry, material );
+              var group = new THREE.Object3D();
+              group.add( mesh );
+              group.position.set(-length, lines[i].vert, lines[i].body.geometry.vertices[0].z);
+
+              var s = Math.random() * (1.5 - .5 + 1) + .5;
+              group.scale.x = s;
+              group.scale.y = s;
+              group.scale.z = s;
+              var b = false;
+
+              if(s > 1)
+                b = true;
+
+              scene.add(group);
+              boxes.push({box: group, updown: b});
+            }
+          }
+        }
+        boxes.forEach(function(box)
+        {
+            box.box.translateX(.50);
+            if(box.box.position.x >= length - 1)
+            {
+                scene.remove(box.box);
+            }
+
+            var average = 0;
+
+            for(var i = 0; i < dataArray.length-50; i++)
+            {
+                average += dataArray[i];
+            }
+            average /= (dataArray.length-50);
+
+            var temp = average / 255;
+            sint = temp*1.5 + 0.5;
+
+            box.box.scale.x = sint;
+            box.box.scale.y = sint;
+            box.box.scale.z = sint;
+
+            // if(box.updown)
+            // {
+            //     if(box.box.scale.x < 1.5)
+            //     {
+            //         box.box.scale.x += sint;
+            //         box.box.scale.y += sint;
+            //         box.box.scale.z += sint;
+            //     }
+            //     else
+            //     {
+            //         box.updown = false;
+            //     }
+            // }
+            // else
+            // {
+            //     if(box.box.scale.x > 0.5)
+            //     {
+            //         box.box.scale.x -= sint;
+            //         box.box.scale.y -= sint;
+            //         box.box.scale.z -= sint;
+            //     }
+            //     else
+            //     {
+            //         box.updown = true;
+            //     }
+            // }
+
+        });
+      counter++;
+        renderer.render( scene, camera );
+    }
+    </script>
+  </body>
+</html>

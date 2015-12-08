@@ -12,14 +12,14 @@
     
     <script>
     var scene, camera, renderer, controls;
-    var geometry, material, mesh, unit;
+    var geometry, material, mesh, unit, norm, geometry2;
     var group, group1;
     var numOfLines = 7;
     var lines = [];
     var boxes = [];
     var length = 50;
     var counter = 60;
-
+    var c = 0;
     init();
     render();
 
@@ -54,68 +54,105 @@
 
         var top = 30;
 
-        geometry = new THREE.Geometry();
-        geometry.vertices.push(new THREE.Vector3(-length, -10, 0));
-        geometry.vertices.push(new THREE.Vector3(length, 10, 0));
+        //scene.fog = new THREE.FogExp2( 0xaaaaaa, 0.005 );
 
-        var material = new THREE.LineBasicMaterial({
-            color: 0x00ff00
-        });
+        for(var i = 0; i < 20; i++)
+        {
+            geometry2 = new THREE.Geometry();
+            geometry2.vertices.push(new THREE.Vector3(-100, 0, i*5));
+            geometry2.vertices.push(new THREE.Vector3(100, 0, 0));
 
-        var l = new THREE.Line(geometry, material);
-        scene.add(l);
+            var material = new THREE.LineBasicMaterial({
+                color: 0x000000
+            });
+            var l = new THREE.Line(geometry2, new THREE.MeshNormalMaterial( { transparent: true, opacity: 0 } ));
 
-        var cgeometry = new THREE.BoxGeometry( 3, 3, 3);
+            unit = new THREE.Vector3(geometry2.vertices[1].x - geometry2.vertices[0].x, geometry2.vertices[1].y - geometry2.vertices[0].y, geometry2.vertices[1].z - geometry2.vertices[0].z).normalize();
 
-        unit = new THREE.Vector3(geometry.vertices[1].x - geometry.vertices[0].x, geometry.vertices[1].y - geometry.vertices[0].y, geometry.vertices[1].z - geometry.vertices[0].z).normalize();
-        console.log(Math.acos(unit.x));
-        console.log(Math.acos(unit.y));
-        console.log(Math.acos(unit.z));
-        console.log(unit.x * unit.x + unit.y * unit.y + unit.z * unit.z);
-        //cgeometry.rotateY(-Math.acos(unit.x));
-        cgeometry.rotateX(-Math.acos(unit.z));
-        cgeometry.rotateZ(-Math.acos(unit.y));
+            scene.add(l);
+            lines.push({line: l, rot: unit});
+        }
 
-        //cgeometry.translate(geometry.vertices[0].x, geometry.vertices[0].y, geometry.vertices[0].z)
-        var material = new THREE.MeshPhongMaterial( { color: 0xffffff, specular: 0x050505,
-        shininess: 100 } );
+        for(var i = 0; i < 20; i++)
+        {
+            geometry2 = new THREE.Geometry();
+            geometry2.vertices.push(new THREE.Vector3(-100, i*5, 0));
+            geometry2.vertices.push(new THREE.Vector3(100, 0, 0));
 
-        var mesh = new THREE.Mesh( cgeometry, material );
+            var material = new THREE.LineBasicMaterial({
+                color: 0x000000
+            });
+            var l = new THREE.Line(geometry2, new THREE.MeshNormalMaterial( { transparent: true, opacity: 0 } ));
 
-        
+            unit = new THREE.Vector3(geometry2.vertices[1].x - geometry2.vertices[0].x, geometry2.vertices[1].y - geometry2.vertices[0].y, geometry2.vertices[1].z - geometry2.vertices[0].z).normalize();
 
-        var rotationMatrix = new THREE.Matrix4();
-        //rotationMatrix.setRotationAxis(unit.normalize(), )
+            scene.add(l);
+            lines.push({line: l, rot: unit});
+        }
 
-        unit.normalize();
-        console.log(mesh.matrix);
-        console.log(Math.acos(unit.x))
-        //mesh.geometry.rotateY(1);
-        //console.log(Math.acos(unit.x));
-        //mesh.rotation.y = Math.acos(unit.y);
-        //mesh.rotation.z = Math.acos(unit.z);
+        // cgeometry.rotateX(-Math.acos(unit.z));
+        // cgeometry.rotateZ(-Math.acos(unit.y));
 
-        group1 = new THREE.Object3D();
-        group1.add( mesh );
-        group1.position.set(0, 0, 0);
+        // cgeometry.translate(geometry.vertices[0].x, geometry.vertices[0].y, geometry.vertices[0].z)
+        // var material = new THREE.MeshPhongMaterial( { color: 0xffffff, specular: 0x050505,
+        // shininess: 100 } );
 
+        // mesh = new THREE.Mesh( cgeometry, material );
 
-        scene.add(group1);
+        // unit.normalize();
+        // console.log(mesh.matrix);
+        // console.log(Math.acos(unit.x));
+
+        // scene.add(mesh);
 
         animate();
     }
 
     function animate() {
         requestAnimationFrame( animate );
-        
-        //var norm = geometry.vertices[1];
-        //norm.normalize();
-        var norm = new THREE.Vector3(geometry.vertices[1].x - geometry.vertices[0].x, geometry.vertices[1].y - geometry.vertices[0].y, geometry.vertices[1].z - geometry.vertices[0].z);
-        norm.normalize();
-        //console.log(norm);
 
-        //group1.position.add(norm);
-        group1.rotation.y += 0.05;
+        if(c === 0)
+        {
+            lines.forEach(function(line)
+            {
+                var cgeometry = new THREE.BoxGeometry( 3, 3, 3);
+                cgeometry.rotateX(-Math.acos(line.rot.z));
+                cgeometry.rotateZ(-Math.acos(line.rot.y));
+
+                cgeometry.translate(line.line.geometry.vertices[0].x, line.line.geometry.vertices[0].y, line.line.geometry.vertices[0].z)
+                var mesh = new THREE.Mesh( cgeometry);
+                scene.add(mesh);
+                boxes.push({m: mesh, tran: line.rot});
+            });
+                // var cgeometry = new THREE.BoxGeometry( 3, 3, 3);
+                // cgeometry.rotateX(-Math.acos(unit.z));
+                // cgeometry.rotateZ(-Math.acos(unit.y));
+
+                // cgeometry.translate(geometry.vertices[0].x, geometry.vertices[0].y, geometry.vertices[0].z)
+                // var material = new THREE.MeshPhongMaterial( { color: 0xffffff, specular: 0x050505,
+                // shininess: 100 } );
+
+                // mesh = new THREE.Mesh( cgeometry, material );
+                // scene.add(mesh);
+                // boxes.push(mesh);
+
+                c = 6;
+        }
+        c--;
+
+        boxes.forEach(function(box)
+        {
+            box.m.position.add(box.tran);
+            box.m.rotation.x += 0.05;
+            if(box.m.position.x > 500)
+                scene.remove(box.m);
+        });
+
+        // var norm = new THREE.Vector3(geometry.vertices[1].x - geometry.vertices[0].x, geometry.vertices[1].y - geometry.vertices[0].y, geometry.vertices[1].z - geometry.vertices[0].z);
+        // norm.normalize();
+
+        // mesh.position.add(norm);
+        // mesh.rotation.x += 0.05;
 
         controls.update();
         renderer.render( scene, camera );
